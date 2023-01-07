@@ -1,0 +1,44 @@
+﻿@page "/ServiceMonitor"
+
+<PageTitle>ServiceMonitor 情報蒐集</PageTitle>
+
+@using System.Timers
+@using service_monitor_1.Data
+@inject MonitorService aService
+
+<h1>ServiceMonitor 情報蒐集</h1>
+
+<p>輸入網址：</p>
+
+<input @bind ="inputValue" />
+<button class="btn btn-primary" @onclick="OnClick">OK</button><br />
+<textarea @bind ="result" rows="10" cols="60"></textarea>
+
+@code {
+    //變數
+    private string inputValue = "";
+    private string result = "";
+    private System.Timers.Timer aTimer = new System.Timers.Timer(1000);
+
+    protected override void OnInitialized()
+    {
+        aTimer.Elapsed += OnTimedEvent;
+    }
+
+    private void OnTimedEvent(Object? source, ElapsedEventArgs e)
+    {
+        this.InvokeAsync(
+            () => {
+                result +=
+                    DateTime.Now.ToLongTimeString() + "connection =>"
+                    + aService.DoMonitor(inputValue) + "\n";
+                StateHasChanged();
+            });
+        
+    }
+
+    private void OnClick()
+    {
+        aTimer.Enabled = true;
+    }
+}
